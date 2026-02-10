@@ -53,7 +53,7 @@ GLboolean pressedKeys[1024];
 
 
 // mouse variables for camera rotation
-GLfloat yaw = -90.0f;  // initial yaw angle (looking along -z axis)
+GLfloat yaw = -90.0f;  //  initial yaw angle (looking along -z axis)
 GLfloat cameraPitch = 0.0f;  //  initial pitch angle
 GLfloat lastX = 512.0f; //  center of window (1024/2)
 GLfloat lastY = 384.0f; //  center of window (768/2)
