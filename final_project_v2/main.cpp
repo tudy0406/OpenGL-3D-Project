@@ -142,7 +142,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
     if (mouseDragging) {
         GLfloat xoffset = static_cast<GLfloat>(xpos - lastX) * mouseSensitivity;
-        GLfloat yoffset = static_cast<GLfloat>(lastY - ypos) * mouseSensitivity; // reversed since y-coordinates go from bottom to top
+        GLfloat yoffset = static_cast<GLfloat>(lastY - ypos) * mouseSensitivity; //  reversed since y-coordinates go from bottom to top
 
         yaw += xoffset;
         cameraPitch += yoffset;
