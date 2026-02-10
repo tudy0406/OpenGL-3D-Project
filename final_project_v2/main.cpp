@@ -99,7 +99,7 @@ GLenum glCheckError_(const char *file, int line)
 
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
 	fprintf(stdout, "Window resized! New width: %d , and height: %d\n", width, height);
-    if (height == 0) height = 1; // prevent division by zero
+    if (height == 0) height = 1; //  prevent division by zero
 
     glViewport(0, 0, width, height);
 
