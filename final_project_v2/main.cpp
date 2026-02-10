@@ -147,7 +147,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
         yaw += xoffset;
         cameraPitch += yoffset;
 
-        // constrain pitch to prevent flipping
+        //  constrain pitch to prevent flipping
         if (cameraPitch > 89.0f)
             cameraPitch = 89.0f;
         if (cameraPitch < -89.0f)
