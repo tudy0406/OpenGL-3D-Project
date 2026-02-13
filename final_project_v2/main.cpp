@@ -279,7 +279,7 @@ void initUniforms() {
     model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 	modelLoc = glGetUniformLocation(myBasicShader.shaderProgram, "model");
 
-	// get view matrix for current camera
+	// get  view matrix for current camera
 	view = myCamera.getViewMatrix();
 	viewLoc = glGetUniformLocation(myBasicShader.shaderProgram, "view");
 	// send view matrix to shader
