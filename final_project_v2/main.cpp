@@ -256,7 +256,7 @@ void initOpenGLState() {
     glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_DEPTH_TEST); // enable depth-testing
 	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
-	glDisable(GL_CULL_FACE); // cull face
+	glDisable(GL_CULL_FACE); //  cull face
 	 //glCullFace(GL_BACK); // cull back face
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
 }
