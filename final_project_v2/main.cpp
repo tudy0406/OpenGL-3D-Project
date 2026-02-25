@@ -66,36 +66,37 @@ gps::Model3D arena;
 gps::Model3D trophy;
 gps::Model3D portugalPlayer;
 gps::Model3D francePlayer;
+gps::Model3D francePlayersNPC;
 gps::Model3D brazilPlayer;
 gps::Model3D argentinaPlayer;
 gps::Model3D footballBall;
 
 
 // Portugal
-glm::vec3 portugalPos = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 portugalRot = glm::vec3(0.0f);
+glm::vec3 portugalPos = glm::vec3(6.0f, 8.23f, -23.0f);
+float portugalRot = glm::radians(15.0f);
 glm::vec3 portugalScale = glm::vec3(1.0f);
 bool portugalRunning = true;
 
 // France
-glm::vec3 francePos = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 franceRot = glm::vec3(0.0f);
+glm::vec3 francePos = glm::vec3(9.0f, 8.23f, -14.0f);
+float franceRot = glm::radians(205.0f);
 glm::vec3 franceScale = glm::vec3(1.0f);
 
 // Brazil
-glm::vec3 brazilPos = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 brazilRot = glm::vec3(0.0f);
+glm::vec3 brazilPos = glm::vec3(0.0f, 8.23f, -37.0f);
+float brazilRot = glm::radians(0.0f);
 glm::vec3 brazilScale = glm::vec3(1.0f);
 
 // Argentina
-glm::vec3 argentinaPos = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 argentinaRot = glm::vec3(0.0f);
-glm::vec3 argentinaScale = glm::vec3(1.0f);
+glm::vec3 argentinaPos = glm::vec3(0.0f, 8.23f, 37.0f);
+float argentinaRot = glm::radians(180.0f);
+glm::vec3 argentinaScale = glm::vec3(0.3f);
 
 // Ball
-glm::vec3 ballPos = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 ballPos = glm::vec3(7.0f, 8.45f, -18.0f);
 glm::vec3 ballRot = glm::vec3(0.0f);
-glm::vec3 ballScale = glm::vec3(1.0f);
+glm::vec3 ballScale = glm::vec3(0.5f);
 
 glm::vec3 ballVelocity = glm::vec3(0.0f);
 bool ballKicked = false;
@@ -281,9 +282,9 @@ void processMovement() {
 void updatePortugal()
 {
     if (portugalRunning) {
-        portugalPos.x += 1.0f * deltaTime;
+        portugalPos.z += 1.0f * deltaTime;
 
-        if (portugalPos.x >= ballPos.x - 1.0f) {
+        if (portugalPos.z >= ballPos.z - 1.0f) {
             portugalRunning = false;
             ballKicked = true;
             ballVelocity = glm::vec3(15.0f, 8.0f, 0.0f);
@@ -317,11 +318,13 @@ void initOpenGLState() {
 void initModels() {
     arena.LoadModel("models/arena/EuroArena.obj", "models/arena/");
     trophy.LoadModel("models/arena/Untitled.obj", "models/arena/");
-    portugalPlayer.LoadModel("models/football_player_-_portugal/football_player_portugal.obj", "models/football_player_-_portugal/");
-    francePlayer.LoadModel("models/football_player_-_france/football_player_france.obj", "models/football_player_-_france/");
-    brazilPlayer.LoadModel("models/football_player_-_brazil/football_player_brazil.obj", "models/football_player_-_brazil/");
-    argentinaPlayer.LoadModel("models/football_player_-_argentina/football_player_argentina.obj", "models/football_player_-_argentina/");
-    footballBall.LoadModel("models/footballsoccer_ball/fottball_ball.obj", "models/footballsoccer_ball/");
+    portugalPlayer.LoadModel("models/football_player_-_portugal/player_portugal.obj", "models/football_player_-_portugal/");
+    francePlayer.LoadModel("models/football_player_-_france/player_france.obj", "models/football_player_-_france/");
+    brazilPlayer.LoadModel("models/football_player_-_brazil/player_brazil.obj", "models/football_player_-_brazil/");
+    argentinaPlayer.LoadModel("models/football_player_-_argentina/player_argentina.obj", "models/football_player_-_argentina/");
+    footballBall.LoadModel("models/footballsoccer_ball/football_ball.obj", "models/footballsoccer_ball/");
+
+    //francePlayersNPC.LoadModel("models/football_player_-_france/player_france.obj", "models/football_player_-_france/");
 }
 
 void initShaders() {
@@ -407,9 +410,10 @@ void renderScene() {
     trophy.Draw(myBasicShader);
 
     // -------- Portugal --------
-    updatePortugal();
+    //updatePortugal();
     model = glm::mat4(1.0f);
     model = glm::translate(model, portugalPos);
+    model = glm::rotate(model, portugalRot, glm::vec3(0.0f, 1.0f, 0.0f));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
@@ -418,6 +422,7 @@ void renderScene() {
     // -------- France --------
     model = glm::mat4(1.0f);
     model = glm::translate(model, francePos);
+    model = glm::rotate(model, franceRot, glm::vec3(0.0f, 1.0f, 0.0f));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
@@ -434,6 +439,8 @@ void renderScene() {
     // -------- Argentina --------
     model = glm::mat4(1.0f);
     model = glm::translate(model, argentinaPos);
+    model = glm::rotate(model, argentinaRot, glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model, argentinaScale);
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
@@ -441,6 +448,8 @@ void renderScene() {
 
     // -------- Ball --------
     model = glm::mat4(1.0f);
+    model = glm::translate(model, ballPos);
+    model = glm::scale(model, ballScale);
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
