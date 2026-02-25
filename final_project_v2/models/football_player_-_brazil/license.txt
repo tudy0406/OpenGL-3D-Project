@@ -1,0 +1,11 @@
+Model Information:
+* title:	Football Player - Brazil
+* source:	https://sketchfab.com/3d-models/football-player-brazil-aff336862de94f8299c3feebff6977a7
+* author:	neshallads (https://sketchfab.com/neshallads)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Football Player - Brazil" (https://sketchfab.com/3d-models/football-player-brazil-aff336862de94f8299c3feebff6977a7) by neshallads (https://sketchfab.com/neshallads) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

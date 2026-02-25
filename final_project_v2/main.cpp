@@ -47,7 +47,7 @@ gps::Camera myCamera(
     glm::vec3(0.0f, 0.0f, -10.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
-GLfloat cameraSpeed = 1.0f;
+GLfloat cameraSpeed = 0.7f;
 
 GLboolean pressedKeys[1024];
 
@@ -64,7 +64,46 @@ GLfloat mouseSensitivity = 0.1f;
 // models
 gps::Model3D arena;
 gps::Model3D trophy;
+gps::Model3D portugalPlayer;
+gps::Model3D francePlayer;
+gps::Model3D brazilPlayer;
+gps::Model3D argentinaPlayer;
+gps::Model3D footballBall;
+
+
+// Portugal
+glm::vec3 portugalPos = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 portugalRot = glm::vec3(0.0f);
+glm::vec3 portugalScale = glm::vec3(1.0f);
+bool portugalRunning = true;
+
+// France
+glm::vec3 francePos = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 franceRot = glm::vec3(0.0f);
+glm::vec3 franceScale = glm::vec3(1.0f);
+
+// Brazil
+glm::vec3 brazilPos = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 brazilRot = glm::vec3(0.0f);
+glm::vec3 brazilScale = glm::vec3(1.0f);
+
+// Argentina
+glm::vec3 argentinaPos = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 argentinaRot = glm::vec3(0.0f);
+glm::vec3 argentinaScale = glm::vec3(1.0f);
+
+// Ball
+glm::vec3 ballPos = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 ballRot = glm::vec3(0.0f);
+glm::vec3 ballScale = glm::vec3(1.0f);
+
+glm::vec3 ballVelocity = glm::vec3(0.0f);
+bool ballKicked = false;
+
 GLfloat angle;
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 // shaders
 gps::Shader myBasicShader;
@@ -239,6 +278,20 @@ void processMovement() {
     }
 }
 
+void updatePortugal()
+{
+    if (portugalRunning) {
+        portugalPos.x += 1.0f * deltaTime;
+
+        if (portugalPos.x >= ballPos.x - 1.0f) {
+            portugalRunning = false;
+            ballKicked = true;
+            ballVelocity = glm::vec3(15.0f, 8.0f, 0.0f);
+        }
+    }
+}
+
+
 void initOpenGLWindow() {
     myWindow.Create(1024, 768, "OpenGL Project Core");
 }
@@ -262,8 +315,13 @@ void initOpenGLState() {
 }
 
 void initModels() {
-    arena.LoadModel("models/arena/EuroArena.obj");
-    trophy.LoadModel("models/arena/Untitled.obj");
+    arena.LoadModel("models/arena/EuroArena.obj", "models/arena/");
+    trophy.LoadModel("models/arena/Untitled.obj", "models/arena/");
+    portugalPlayer.LoadModel("models/football_player_-_portugal/football_player_portugal.obj", "models/football_player_-_portugal/");
+    francePlayer.LoadModel("models/football_player_-_france/football_player_france.obj", "models/football_player_-_france/");
+    brazilPlayer.LoadModel("models/football_player_-_brazil/football_player_brazil.obj", "models/football_player_-_brazil/");
+    argentinaPlayer.LoadModel("models/football_player_-_argentina/football_player_argentina.obj", "models/football_player_-_argentina/");
+    footballBall.LoadModel("models/footballsoccer_ball/fottball_ball.obj", "models/footballsoccer_ball/");
 }
 
 void initShaders() {
@@ -310,7 +368,7 @@ void initUniforms() {
 	glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));*/
 }
 
-void renderArena(gps::Shader shader) {
+/*void renderArena(gps::Shader shader) {
     // select active shader program
     shader.useShaderProgram();
 
@@ -323,16 +381,70 @@ void renderArena(gps::Shader shader) {
     // draw arena
     arena.Draw(shader);
     trophy.Draw(shader);
-}
+    portugalPlayer.Draw(shader);
+    francePlayer.Draw(shader);
+    brazilPlayer.Draw(shader);
+    argentinaPlayer.Draw(shader);
+    footballBall.Draw(shader);
+}*/
 
 void renderScene() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    myBasicShader.useShaderProgram();
 
-	//render the scene
+    // -------- Arena --------
+    model = glm::mat4(1.0f);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    arena.Draw(myBasicShader);
 
-	// render the arena
-	renderArena(myBasicShader);
+    // -------- Trophy --------
+    model = glm::mat4(1.0f);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    trophy.Draw(myBasicShader);
 
+    // -------- Portugal --------
+    updatePortugal();
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, portugalPos);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    portugalPlayer.Draw(myBasicShader);
+
+    // -------- France --------
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, francePos);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    francePlayer.Draw(myBasicShader);
+
+    // -------- Brazil --------
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, brazilPos);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    brazilPlayer.Draw(myBasicShader);
+
+    // -------- Argentina --------
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, argentinaPos);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    argentinaPlayer.Draw(myBasicShader);
+
+    // -------- Ball --------
+    model = glm::mat4(1.0f);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    footballBall.Draw(myBasicShader);
 }
 
 void cleanup() {
@@ -358,6 +470,10 @@ int main(int argc, const char * argv[]) {
 	glCheckError();
 	// application loop
 	while (!glfwWindowShouldClose(myWindow.getWindow())) {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+        
         processMovement();
 	    renderScene();
 
@@ -365,6 +481,7 @@ int main(int argc, const char * argv[]) {
 		glfwSwapBuffers(myWindow.getWindow());
 
 		glCheckError();
+        
 	}
 
 	cleanup();
