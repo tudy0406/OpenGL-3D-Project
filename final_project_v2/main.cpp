@@ -74,16 +74,18 @@ gps::Model3D footballBall;
 
 // Portugal
 glm::vec3 portugalPosOrig = glm::vec3(6.0f, 8.23f, -23.0f);
+float portugalRotOrig = glm::radians(15.0f);
 glm::vec3 portugalPos = glm::vec3(6.0f, 8.23f, -23.0f);
 float portugalRot = glm::radians(15.0f);
 glm::vec3 portugalScale = glm::vec3(1.0f);
 
 // France
 glm::vec3 francePosOrig = glm::vec3(9.0f, 8.23f, -14.0f);
+float franceRotOrig = glm::radians(205.0f);
 glm::vec3 francePos = glm::vec3(9.0f, 8.23f, -14.0f);
 float franceRot = glm::radians(205.0f);
 glm::vec3 franceScale = glm::vec3(1.0f);
-bool franceRunning = false;
+
 
 // FranceNPCs
 glm::vec3 franceNPCPosOrig = glm::vec3(0.0f, -0.05f, 1.0f);
@@ -106,14 +108,15 @@ glm::vec3 argentinaScale = glm::vec3(0.3f);
 // Ball
 glm::vec3 ballPosOrig = glm::vec3(7.0f, 8.45f, -18.0f);
 glm::vec3 ballPos = glm::vec3(7.0f, 8.45f, -18.0f);
-glm::vec3 ballRotOrig = glm::vec3(0.0f);
-glm::vec3 ballRot = glm::vec3(0.0f);
+float ballRotOrig = glm::radians(0.0f);
+float ballRotX = glm::radians(0.0f);
+float ballRotZ = glm::radians(0.0f);
 glm::vec3 ballScale = glm::vec3(0.5f);
 
 glm::vec3 ballVelocity = glm::vec3(0.0f);
-bool ballKicked = false;
 
-float runningSpeed = 0.75f;
+
+float runningSpeed = 1.0f;
 float jumpingSpeed = 2.0f;
 
 GLfloat angle;
@@ -123,6 +126,20 @@ float lastFrame = 0.0f;
 
 // shaders
 gps::Shader myBasicShader;
+
+
+//Animation functions
+void startAnimation();
+void resetScene();
+void updateFrance();
+void updateBall();
+bool animationDone = false;
+
+bool franceRunning = false;
+bool ballKicked = false;
+
+bool ballCamera = false;
+
 
 GLenum glCheckError_(const char *file, int line)
 {
@@ -248,7 +265,6 @@ void processMovement() {
 	}
 
 	if (pressedKeys[GLFW_KEY_S]) {
-        franceRunning = true;
 		myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
         //update view matrix
         view = myCamera.getViewMatrix();
@@ -293,6 +309,39 @@ void processMovement() {
         // update normal matrix for arena
         normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
     }
+
+    if (pressedKeys[GLFW_KEY_J]) {
+        startAnimation();
+    }
+
+    if (pressedKeys[GLFW_KEY_L]) {
+        resetScene();
+    }
+    
+}
+
+
+//Animations
+
+void startAnimation() {
+    if (!animationDone) {
+        franceRunning = true;
+        animationDone = true;
+    }
+}
+
+void resetScene() {
+    portugalPos = portugalPosOrig;
+    francePos = francePosOrig;
+    franceRot = franceRotOrig;
+    franceNPCPos = franceNPCPosOrig;
+    brazilPos = brazilPosOrig;
+    argentinaPos = argentinaPosOrig;
+    ballPos = ballPosOrig;
+    ballRotX = ballRotZ = ballRotOrig;
+    franceRunning = false;
+    ballKicked = false;
+    animationDone = false;
 }
 
 void updateFrance()
@@ -318,10 +367,12 @@ void updateBall()
     ballVelocity.y -= 9.8f * deltaTime;
     
     ballPos += ballVelocity * deltaTime;
-
+    ballRotX += 2.5f * deltaTime;
+    ballRotZ += 5.0f * deltaTime;
     if (ballPos.y <= 8.45f) // <- use your field height
     {
         ballPos.y = 8.45f;
+        ballRotX = ballRotZ = 0.0f;
         ballVelocity = glm::vec3(0.0f);
         ballKicked = false;
     }
@@ -345,7 +396,7 @@ void initOpenGLState() {
 	glEnable(GL_DEPTH_TEST); // enable depth-testing
 	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
 	glDisable(GL_CULL_FACE); //  cull face
-	 //glCullFace(GL_BACK); // cull back face
+	//glCullFace(GL_BACK); // cull back face
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
 }
 
@@ -398,32 +449,12 @@ void initUniforms() {
 	// send light dir to shader
 	glUniform3fv(lightDirLoc, 1, glm::value_ptr(lightDir));
 
-	/*/set light color
+	//set light color
 	lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
 	lightColorLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightColor");
 	// send light color to shader
-	glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));*/
+	glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
 }
-
-/*void renderArena(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
-    //send arena model matrix data to shader
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-    //send arena normal matrix data to shader
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-    // draw arena
-    arena.Draw(shader);
-    trophy.Draw(shader);
-    portugalPlayer.Draw(shader);
-    francePlayer.Draw(shader);
-    brazilPlayer.Draw(shader);
-    argentinaPlayer.Draw(shader);
-    footballBall.Draw(shader);
-}*/
 
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -491,9 +522,16 @@ void renderScene() {
 
     // -------- Ball --------
     updateBall();
+    /*if (ballCamera) {
+        myCamera = gps::Camera(
+            glm::vec3
+        )
+    }*/
     model = glm::mat4(1.0f);
     model = glm::translate(model, ballPos);
     model = glm::scale(model, ballScale);
+    model = glm::rotate(model, ballRotZ, glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::rotate(model, ballRotX, glm::vec3(1.0f, 0.0f, 0.0f));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
