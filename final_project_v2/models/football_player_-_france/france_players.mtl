@@ -1,16 +1,6 @@
 # Blender 5.0.1 MTL File: 'None'
 # www.blender.org
 
-newmtl Material.114
-Ns 409.036682
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1000.000000
-d 1.000000
-illum 2
-map_Kd C:/Material_diffuse.jpeg
-
 newmtl Material.171
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
@@ -19,8 +9,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png
 
 newmtl Material.172
 Ns 250.000000
@@ -30,8 +20,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png
 
 newmtl Material.173
 Ns 250.000000
@@ -41,8 +31,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png
 
 newmtl Material.174
 Ns 250.000000
@@ -52,8 +42,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png
 
 newmtl Material.175
 Ns 250.000000
@@ -63,8 +53,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png
 
 newmtl Material.176
 Ns 250.000000
@@ -74,8 +64,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png
 
 newmtl Material.177
 Ns 250.000000
@@ -85,8 +75,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png
 
 newmtl Material.178
 Ns 250.000000
@@ -96,8 +86,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png
 
 newmtl Material.179
 Ns 250.000000
@@ -107,5 +97,5 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/Material.003_baseColor.jpeg
-map_Bump -bm 1.000000 C:/Material.003_normal.png
+map_Kd textures/Material.003_baseColor.jpeg
+map_Bump -bm 1.000000 textures/Material.003_normal.png

@@ -73,33 +73,48 @@ gps::Model3D footballBall;
 
 
 // Portugal
+glm::vec3 portugalPosOrig = glm::vec3(6.0f, 8.23f, -23.0f);
 glm::vec3 portugalPos = glm::vec3(6.0f, 8.23f, -23.0f);
 float portugalRot = glm::radians(15.0f);
 glm::vec3 portugalScale = glm::vec3(1.0f);
-bool portugalRunning = true;
 
 // France
+glm::vec3 francePosOrig = glm::vec3(9.0f, 8.23f, -14.0f);
 glm::vec3 francePos = glm::vec3(9.0f, 8.23f, -14.0f);
 float franceRot = glm::radians(205.0f);
 glm::vec3 franceScale = glm::vec3(1.0f);
+bool franceRunning = false;
+
+// FranceNPCs
+glm::vec3 franceNPCPosOrig = glm::vec3(0.0f, -0.05f, 1.0f);
+glm::vec3 franceNPCPos = glm::vec3(0.0f, -0.05f, 1.0f);
+float franceNPCRot = glm::radians(0.0f);
+glm::vec3 franceNPCScale = glm::vec3(1.0f);
 
 // Brazil
+glm::vec3 brazilPosOrig = glm::vec3(0.0f, 8.23f, -37.0f);
 glm::vec3 brazilPos = glm::vec3(0.0f, 8.23f, -37.0f);
 float brazilRot = glm::radians(0.0f);
 glm::vec3 brazilScale = glm::vec3(1.0f);
 
 // Argentina
-glm::vec3 argentinaPos = glm::vec3(0.0f, 8.23f, 37.0f);
+glm::vec3 argentinaPosOrig = glm::vec3(0.0f, 8.24f, 37.0f);
+glm::vec3 argentinaPos = glm::vec3(0.0f, 8.24f, 37.0f);
 float argentinaRot = glm::radians(180.0f);
 glm::vec3 argentinaScale = glm::vec3(0.3f);
 
 // Ball
+glm::vec3 ballPosOrig = glm::vec3(7.0f, 8.45f, -18.0f);
 glm::vec3 ballPos = glm::vec3(7.0f, 8.45f, -18.0f);
+glm::vec3 ballRotOrig = glm::vec3(0.0f);
 glm::vec3 ballRot = glm::vec3(0.0f);
 glm::vec3 ballScale = glm::vec3(0.5f);
 
 glm::vec3 ballVelocity = glm::vec3(0.0f);
 bool ballKicked = false;
+
+float runningSpeed = 0.75f;
+float jumpingSpeed = 2.0f;
 
 GLfloat angle;
 
@@ -233,6 +248,7 @@ void processMovement() {
 	}
 
 	if (pressedKeys[GLFW_KEY_S]) {
+        franceRunning = true;
 		myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
         //update view matrix
         view = myCamera.getViewMatrix();
@@ -279,19 +295,37 @@ void processMovement() {
     }
 }
 
-void updatePortugal()
+void updateFrance()
 {
-    if (portugalRunning) {
-        portugalPos.z += 1.0f * deltaTime;
+    if (franceRunning) {
+        francePos.x -= runningSpeed * deltaTime;
+        francePos.z -= 2 * runningSpeed * deltaTime;
 
-        if (portugalPos.z >= ballPos.z - 1.0f) {
-            portugalRunning = false;
+        if (francePos.z <= ballPos.z + 0.5f) {
+            franceRunning = false;
             ballKicked = true;
-            ballVelocity = glm::vec3(15.0f, 8.0f, 0.0f);
+            std::cout << "Ball kicked!!!";
+            ballVelocity = glm::vec3(-6.0f, 8.0f, -12.0f);
         }
     }
 }
 
+void updateBall()
+{
+    if (!ballKicked)
+        return;
+
+    ballVelocity.y -= 9.8f * deltaTime;
+    
+    ballPos += ballVelocity * deltaTime;
+
+    if (ballPos.y <= 8.45f) // <- use your field height
+    {
+        ballPos.y = 8.45f;
+        ballVelocity = glm::vec3(0.0f);
+        ballKicked = false;
+    }
+}
 
 void initOpenGLWindow() {
     myWindow.Create(1024, 768, "OpenGL Project Core");
@@ -324,7 +358,7 @@ void initModels() {
     argentinaPlayer.LoadModel("models/football_player_-_argentina/player_argentina.obj", "models/football_player_-_argentina/");
     footballBall.LoadModel("models/footballsoccer_ball/football_ball.obj", "models/footballsoccer_ball/");
 
-    //francePlayersNPC.LoadModel("models/football_player_-_france/player_france.obj", "models/football_player_-_france/");
+    francePlayersNPC.LoadModel("models/football_player_-_france/france_players.obj", "models/football_player_-_france/");
 }
 
 void initShaders() {
@@ -420,6 +454,7 @@ void renderScene() {
     portugalPlayer.Draw(myBasicShader);
 
     // -------- France --------
+    updateFrance();
     model = glm::mat4(1.0f);
     model = glm::translate(model, francePos);
     model = glm::rotate(model, franceRot, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -427,6 +462,14 @@ void renderScene() {
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
     francePlayer.Draw(myBasicShader);
+
+    // -------- FranceNPC --------
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, franceNPCPos);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    francePlayersNPC.Draw(myBasicShader);
 
     // -------- Brazil --------
     model = glm::mat4(1.0f);
@@ -447,6 +490,7 @@ void renderScene() {
     argentinaPlayer.Draw(myBasicShader);
 
     // -------- Ball --------
+    updateBall();
     model = glm::mat4(1.0f);
     model = glm::translate(model, ballPos);
     model = glm::scale(model, ballScale);
