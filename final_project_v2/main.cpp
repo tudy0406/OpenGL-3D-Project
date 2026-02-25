@@ -47,6 +47,8 @@ gps::Camera myCamera(
     glm::vec3(0.0f, 0.0f, -10.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
+gps::Camera myCameraOldState = myCamera;
+
 GLfloat cameraSpeed = 0.7f;
 
 GLboolean pressedKeys[1024];
@@ -116,7 +118,7 @@ glm::vec3 ballScale = glm::vec3(0.5f);
 glm::vec3 ballVelocity = glm::vec3(0.0f);
 
 
-float runningSpeed = 1.0f;
+float runningSpeed = 1.25f;
 float jumpingSpeed = 2.0f;
 
 GLfloat angle;
@@ -129,6 +131,7 @@ gps::Shader myBasicShader;
 
 
 //Animation functions
+void updateCamera();
 void startAnimation();
 void resetScene();
 void updateFrance();
@@ -139,6 +142,7 @@ bool franceRunning = false;
 bool ballKicked = false;
 
 bool ballCamera = false;
+bool returnToOldCamera = false;
 
 
 GLenum glCheckError_(const char *file, int line)
@@ -206,39 +210,41 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 }
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
-    if (firstMouse) {
+    if (!ballCamera) {
+        if (firstMouse) {
+            lastX = static_cast<GLfloat>(xpos);
+            lastY = static_cast<GLfloat>(ypos);
+            firstMouse = false;
+        }
+
+        if (mouseDragging) {
+            GLfloat xoffset = static_cast<GLfloat>(xpos - lastX) * mouseSensitivity;
+            GLfloat yoffset = static_cast<GLfloat>(lastY - ypos) * mouseSensitivity; // reversed since y-coordinates go from bottom to top
+
+            yaw += xoffset;
+            cameraPitch += yoffset;
+
+            //  constrain pitch to prevent flipping
+            if (cameraPitch > 89.0f)
+                cameraPitch = 89.0f;
+            if (cameraPitch < -89.0f)
+                cameraPitch = -89.0f;
+
+            // rotate camera
+            myCamera.rotate(cameraPitch, yaw);
+
+            // update view matrix
+            view = myCamera.getViewMatrix();
+            myBasicShader.useShaderProgram();
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            // compute normal matrix for pitch
+            normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+            glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+        }
+
         lastX = static_cast<GLfloat>(xpos);
         lastY = static_cast<GLfloat>(ypos);
-        firstMouse = false;
     }
-
-    if (mouseDragging) {
-        GLfloat xoffset = static_cast<GLfloat>(xpos - lastX) * mouseSensitivity;
-        GLfloat yoffset = static_cast<GLfloat>(lastY - ypos) * mouseSensitivity; // reversed since y-coordinates go from bottom to top
-
-        yaw += xoffset;
-        cameraPitch += yoffset;
-
-        //  constrain pitch to prevent flipping
-        if (cameraPitch > 89.0f)
-            cameraPitch = 89.0f;
-        if (cameraPitch < -89.0f)
-            cameraPitch = -89.0f;
-
-        // rotate camera
-        myCamera.rotate(cameraPitch, yaw);
-
-        // update view matrix
-        view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for pitch
-        normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
-        glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-    }
-
-    lastX = static_cast<GLfloat>(xpos);
-    lastY = static_cast<GLfloat>(ypos);
 }
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
@@ -254,60 +260,62 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void processMovement() {
-	if (pressedKeys[GLFW_KEY_W]) {
-		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
-		//update view matrix
-        view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for arena
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	}
+    if (!ballCamera) {
+        if (pressedKeys[GLFW_KEY_W]) {
+            myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
+            //update view matrix
+            view = myCamera.getViewMatrix();
+            myBasicShader.useShaderProgram();
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            // compute normal matrix for arena
+            normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+        }
 
-	if (pressedKeys[GLFW_KEY_S]) {
-		myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
-        //update view matrix
-        view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for arena
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	}
+        if (pressedKeys[GLFW_KEY_S]) {
+            myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
+            //update view matrix
+            view = myCamera.getViewMatrix();
+            myBasicShader.useShaderProgram();
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            // compute normal matrix for arena
+            normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+        }
 
-	if (pressedKeys[GLFW_KEY_A]) {
-		myCamera.move(gps::MOVE_LEFT, cameraSpeed);
-        //update view matrix
-        view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for arena
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	}
+        if (pressedKeys[GLFW_KEY_A]) {
+            myCamera.move(gps::MOVE_LEFT, cameraSpeed);
+            //update view matrix
+            view = myCamera.getViewMatrix();
+            myBasicShader.useShaderProgram();
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            // compute normal matrix for arena
+            normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+        }
 
-	if (pressedKeys[GLFW_KEY_D]) {
-		myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
-        //update view matrix
-        view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for arena
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	}
+        if (pressedKeys[GLFW_KEY_D]) {
+            myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
+            //update view matrix
+            view = myCamera.getViewMatrix();
+            myBasicShader.useShaderProgram();
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            // compute normal matrix for arena
+            normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+        }
 
-    if (pressedKeys[GLFW_KEY_Q]) {
-        angle -= 1.0f;
-        // update model matrix for arena
-        model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
-        // update normal matrix for arena
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-    }
+        if (pressedKeys[GLFW_KEY_Q]) {
+            angle -= 1.0f;
+            // update model matrix for arena
+            model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
+            // update normal matrix for arena
+            normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+        }
 
-    if (pressedKeys[GLFW_KEY_E]) {
-        angle += 1.0f;
-        // update model matrix for arena
-        model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
-        // update normal matrix for arena
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
+        if (pressedKeys[GLFW_KEY_E]) {
+            angle += 1.0f;
+            // update model matrix for arena
+            model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
+            // update normal matrix for arena
+            normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+        }
     }
 
     if (pressedKeys[GLFW_KEY_J]) {
@@ -316,6 +324,13 @@ void processMovement() {
 
     if (pressedKeys[GLFW_KEY_L]) {
         resetScene();
+    }
+    
+    if (pressedKeys[GLFW_KEY_C]) {
+        ballCamera = !ballCamera;
+        returnToOldCamera = false;
+        yaw = -90.0f;
+        cameraPitch = 0.0f;
     }
     
 }
@@ -344,6 +359,37 @@ void resetScene() {
     animationDone = false;
 }
 
+void updateCamera() {
+    if (ballCamera) {
+        myCamera.setPosition(glm::vec3(ballPos.x, ballPos.y, ballPos.z + 5.0f));
+
+        //reset camera rotations
+        yaw = -90.0f;
+        cameraPitch = 0.0f;
+        // update view matrix
+        view = myCamera.getViewMatrix();
+        myBasicShader.useShaderProgram();
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+        // compute normal matrix for pitch
+        normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+        glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+
+    } else if(returnToOldCamera) {
+        returnToOldCamera = false;
+        myCamera = myCameraOldState;
+
+        // update view matrix
+        view = myCamera.getViewMatrix();
+        myBasicShader.useShaderProgram();
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+        // compute normal matrix for pitch
+        normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+        glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    }
+}
+
 void updateFrance()
 {
     if (franceRunning) {
@@ -353,6 +399,8 @@ void updateFrance()
         if (francePos.z <= ballPos.z + 0.5f) {
             franceRunning = false;
             ballKicked = true;
+            ballCamera = true;
+            myCameraOldState = myCamera;
             std::cout << "Ball kicked!!!";
             ballVelocity = glm::vec3(-6.0f, 8.0f, -12.0f);
         }
@@ -365,7 +413,7 @@ void updateBall()
         return;
 
     ballVelocity.y -= 9.8f * deltaTime;
-    
+
     ballPos += ballVelocity * deltaTime;
     ballRotX += 2.5f * deltaTime;
     ballRotZ += 5.0f * deltaTime;
@@ -375,6 +423,10 @@ void updateBall()
         ballRotX = ballRotZ = 0.0f;
         ballVelocity = glm::vec3(0.0f);
         ballKicked = false;
+        if (ballCamera) {
+            ballCamera = false;
+            returnToOldCamera = true;
+        }
     }
 }
 
@@ -566,6 +618,8 @@ int main(int argc, const char * argv[]) {
         lastFrame = currentFrame;
         
         processMovement();
+        updateCamera();
+
 	    renderScene();
 
 		glfwPollEvents();
